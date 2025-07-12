@@ -169,8 +169,7 @@ The application includes comprehensive validation:
 
 ## 📱 Screenshots
 
-### Desktop View - Employee Dashboard
-*Main dashboard showing employee cards with search, filter, and sort controls*
+### Desktop View - Employee Dashboard (<img width="1920" height="1080" alt="Screenshot (228)" src="https://github.com/user-attachments/assets/6a86df8b-52c3-4d99-b50f-95884a1bb73e" />)
 
 ### Mobile View - Responsive Design
 *Fully responsive design optimized for mobile devices*

@@ -169,16 +169,16 @@ The application includes comprehensive validation:
 
 ## 📱 Screenshots
 
-### Desktop View - Employee Dashboard (<img width="1920" height="1080" alt="Screenshot (228)" src="https://github.com/user-attachments/assets/6a86df8b-52c3-4d99-b50f-95884a1bb73e" />)
+### Desktop View - Employee Dashboard <img width="1920" height="1080" alt="Screenshot (228)" src="https://github.com/user-attachments/assets/6a86df8b-52c3-4d99-b50f-95884a1bb73e" />
 
-### Mobile View - Responsive Design
-*Fully responsive design optimized for mobile devices*
+### Mobile View - Responsive Design ![WhatsApp Image 2025-07-12 at 12 39 19_928570cb](https://github.com/user-attachments/assets/e336c77d-47c2-4f46-88aa-a309277ae7ae)
 
-### Add/Edit Employee Form
-*Modal form for adding and editing employee information*
 
-### Filter Sidebar
-*Advanced filtering options with department and role selection*
+### Add/Edit Employee Form <img width="1920" height="1080" alt="Screenshot (229)" src="https://github.com/user-attachments/assets/8b87e362-c571-4157-b52f-673b5b9e53a6" />
+
+
+### Filter Sidebar <img width="1920" height="1080" alt="Screenshot (229)" src="https://github.com/user-attachments/assets/3a8665d2-e903-4850-962b-d0197622ae38" />
+
 
 ## 🚧 Assignment Requirements Compliance
 

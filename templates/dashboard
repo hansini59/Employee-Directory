@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Directory Web Interface</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>Employee Directory</h1>
+        </header>
+
+        <main class="main-content">
+            <!-- Controls Section -->
+            <div class="controls">
+                <div class="search-section">
+                    <div class="search-bar">
+                        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Search by name or email">
+                    </div>
+                </div>
+
+                <div class="action-section">
+                    <div class="control-group">
+                        <label>Sort:</label>
+                        <select id="sort-select" class="select-dropdown">
+                            <option value="firstName">First Name</option>
+                            <option value="lastName">Last Name</option>
+                            <option value="department">Department</option>
+                            <option value="role">Role</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Show:</label>
+                        <select id="items-per-page" class="select-dropdown">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+
+                    <button class="filter-btn" id="filter-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+                        </svg>
+                        Filter
+                    </button>
+
+                    <button class="add-btn" id="add-employee-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Employee
+                    </button>
+                </div>
+            </div>
+
+            <!-- Employee Grid - Rendered by Freemarker -->
+            <div id="employee-grid" class="employee-grid">
+                <#-- Assign mock employee data -->
+                <#assign employees = [
+                    {"id": 1, "firstName": "Alice", "lastName": "Smith", "email": "alice@example.com", "department": "HR", "role": "Manager"},
+                    {"id": 2, "firstName": "Bob", "lastName": "Johnson", "email": "bob@example.com", "department": "IT", "role": "Developer"},
+                    {"id": 3, "firstName": "Charlie", "lastName": "Lee", "email": "charlie@example.com", "department": "Finance", "role": "Analyst"},
+                    {"id": 4, "firstName": "Diana", "lastName": "Martinez", "email": "diana@example.com", "department": "Marketing", "role": "Coordinator"},
+                    {"id": 5, "firstName": "Edward", "lastName": "Brown", "email": "edward@example.com", "department": "IT", "role": "Senior Developer"},
+                    {"id": 6, "firstName": "Fiona", "lastName": "Davis", "email": "fiona@example.com", "department": "HR", "role": "Recruiter"},
+                    {"id": 7, "firstName": "George", "lastName": "Wilson", "email": "george@example.com", "department": "Finance", "role": "Manager"},
+                    {"id": 8, "firstName": "Helen", "lastName": "Taylor", "email": "helen@example.com", "department": "Marketing", "role": "Manager"},
+                    {"id": 9, "firstName": "Ian", "lastName": "Anderson", "email": "ian@example.com", "department": "IT", "role": "DevOps Engineer"},
+                    {"id": 10, "firstName": "Julia", "lastName": "Thomas", "email": "julia@example.com", "department": "HR", "role": "Specialist"},
+                    {"id": 11, "firstName": "Kevin", "lastName": "Jackson", "email": "kevin@example.com", "department": "Finance", "role": "Accountant"},
+                    {"id": 12, "firstName": "Laura", "lastName": "White", "email": "laura@example.com", "department": "Marketing", "role": "Designer"}
+                ]>
+
+                <#-- Render employee cards using Freemarker list directive -->
+                <#list employees as employee>
+                    <div class="employee-card" data-employee-id="${employee.id}">
+                        <h3>${employee.firstName} ${employee.lastName}</h3>
+                        <div class="employee-details">
+                            <p><strong>Email:</strong> ${employee.email}</p>
+                            <p><strong>Department:</strong> ${employee.department}</p>
+                            <p><strong>Role:</strong> ${employee.role}</p>
+                        </div>
+                        <div class="employee-actions">
+                            <button class="edit-btn" data-id="${employee.id}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Edit
+                            </button>
+                            <button class="delete-btn" data-id="${employee.id}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3,6 5,6 21,6"></polyline>
+                                    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"></path>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </#list>
+            </div>
+
+            <!-- No Results Message -->
+            <div id="no-results" class="no-results" style="display: none;">
+                <p>No employees found matching your criteria.</p>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="pagination">
+                <div class="pagination-info" id="pagination-info">
+                    Showing 1-${employees?size} of ${employees?size} employees
+                </div>
+                <div class="pagination-controls" id="pagination-controls">
+                    <!-- Pagination controls will be generated by JavaScript -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Add/Edit Modal -->
+        <div id="modal-overlay" class="modal-overlay" style="display: none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 id="modal-title">Add Employee</h2>
+                    <button class="close-btn" id="close-modal">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="employee-form" class="employee-form">
+                    <div class="form-group">
+                        <label for="firstName">First name</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                        <span class="error-text" id="firstName-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">Last name</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                        <span class="error-text" id="lastName-error"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                            <span class="error-text" id="email-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <div class="select-wrapper">
+                                <select id="department" name="department" required>
+                                    <option value="">Select Department</option>
+                                    <option value="HR">HR</option>
+                                    <option value="IT">IT</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Operations">Operations</option>
+                                    <option value="Sales">Sales</option>
+                                </select>
+                                <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6,9 12,15 18,9"></polyline>
+                                </svg>
+                            </div>
+                            <span class="error-text" id="department-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <div class="select-wrapper">
+                            <select id="role" name="role" required>
+                                <option value="">Select Role</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Developer">Developer</option>
+                                <option value="Analyst">Analyst</option>
+                                <option value="Coordinator">Coordinator</option>
+                                <option value="Senior Developer">Senior Developer</option>
+                                <option value="Recruiter">Recruiter</option>
+                                <option value="DevOps Engineer">DevOps Engineer</option>
+                                <option value="Specialist">Specialist</option>
+                                <option value="Accountant">Accountant</option>
+                                <option value="Designer">Designer</option>
+                            </select>
+                            <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6,9 12,15 18,9"></polyline>
+                            </svg>
+                        </div>
+                        <span class="error-text" id="role-error"></span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" id="cancel-btn">Cancel</button>
+                        <button type="submit" class="submit-btn" id="submit-btn">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Filter Sidebar -->
+        <div id="sidebar-overlay" class="sidebar-overlay" style="display: none;">
+            <div class="filter-sidebar">
+                <div class="sidebar-header">
+                    <h3>Filter Employees</h3>
+                    <button class="close-btn" id="close-sidebar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="filter-form">
+                    <div class="form-group">
+                        <label for="filter-firstName">First Name:</label>
+                        <input type="text" id="filter-firstName" placeholder="Enter first name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filter-department">Department:</label>
+                        <select id="filter-department">
+                            <option value="">All Departments</option>
+                            <option value="HR">HR</option>
+                            <option value="IT">IT</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Sales">Sales</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filter-role">Role:</label>
+                        <select id="filter-role">
+                            <option value="">All Roles</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Developer">Developer</option>
+                            <option value="Analyst">Analyst</option>
+                            <option value="Coordinator">Coordinator</option>
+                            <option value="Senior Developer">Senior Developer</option>
+                            <option value="Recruiter">Recruiter</option>
+                            <option value="DevOps Engineer">DevOps Engineer</option>
+                            <option value="Specialist">Specialist</option>
+                            <option value="Accountant">Accountant</option>
+                            <option value="Designer">Designer</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="button" class="reset-btn" id="reset-filters">Reset</button>
+                        <button type="button" class="apply-btn" id="apply-filters">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <#-- Pass employee data to JavaScript -->
+    <script>
+        window.initialEmployees = [
+            <#list employees as employee>
+                {
+                    id: ${employee.id},
+                    firstName: "${employee.firstName}",
+                    lastName: "${employee.lastName}",
+                    email: "${employee.email}",
+                    department: "${employee.department}",
+                    role: "${employee.role}"
+                }<#if employee_has_next>,</#if>
+            </#list>
+        ];
+    </script>
+    
+    <script src="/static/js/data.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

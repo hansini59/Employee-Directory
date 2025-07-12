@@ -2,7 +2,7 @@
 
 A modern, responsive Employee Directory application built with **HTML, CSS, JavaScript, and Freemarker templates**. This application provides a comprehensive interface for managing employee data with advanced filtering, searching, sorting, and pagination capabilities.
 
-##LINK(https://glittering-sprite-bf1f6b.netlify.app/)
+##LINK(https://startling-liger-d26a4e.netlify.app/)
 
 ## 🚀 Features
 

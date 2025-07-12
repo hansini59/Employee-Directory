@@ -1,0 +1,412 @@
+// Employee Directory Application
+class EmployeeDirectory {
+    constructor() {
+        this.employees = window.employees || [];
+        this.filteredEmployees = [...this.employees];
+        this.currentPage = 1;
+        this.itemsPerPage = 10;
+        this.sortBy = 'firstName';
+        this.searchTerm = '';
+        this.filters = {
+            firstName: '',
+            department: '',
+            role: ''
+        };
+        this.editingEmployee = null;
+
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.renderEmployees();
+        this.updatePagination();
+    }
+
+    bindEvents() {
+        // Search functionality
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            this.searchTerm = e.target.value;
+            this.applyFiltersAndSearch();
+        });
+
+        // Sort functionality
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            this.sortBy = e.target.value;
+            this.applyFiltersAndSearch();
+        });
+
+        // Items per page
+        document.getElementById('items-per-page').addEventListener('change', (e) => {
+            this.itemsPerPage = parseInt(e.target.value);
+            this.currentPage = 1;
+            this.renderEmployees();
+            this.updatePagination();
+        });
+
+        // Filter button
+        document.getElementById('filter-btn').addEventListener('click', () => {
+            this.showFilterSidebar();
+        });
+
+        // Add employee button
+        document.getElementById('add-employee-btn').addEventListener('click', () => {
+            this.showAddModal();
+        });
+
+        // Modal close buttons
+        document.getElementById('close-modal').addEventListener('click', () => {
+            this.closeModal();
+        });
+
+        document.getElementById('modal-overlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal-overlay')) {
+                this.closeModal();
+            }
+        });
+
+        // Form submission
+        document.getElementById('employee-form').addEventListener('submit', (e) => {
+            this.handleFormSubmit(e);
+        });
+
+        // Cancel button
+        document.getElementById('cancel-btn').addEventListener('click', () => {
+            this.closeModal();
+        });
+
+        // Filter sidebar events
+        document.getElementById('close-sidebar').addEventListener('click', () => {
+            this.closeFilterSidebar();
+        });
+
+        document.getElementById('sidebar-overlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('sidebar-overlay')) {
+                this.closeFilterSidebar();
+            }
+        });
+
+        document.getElementById('apply-filters').addEventListener('click', () => {
+            this.applyFilters();
+        });
+
+        document.getElementById('reset-filters').addEventListener('click', () => {
+            this.resetFilters();
+        });
+    }
+
+    applyFiltersAndSearch() {
+        let filtered = [...this.employees];
+
+        // Apply search
+        if (this.searchTerm) {
+            filtered = filtered.filter(employee => 
+                employee.firstName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                employee.lastName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                employee.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+            );
+        }
+
+        // Apply filters
+        if (this.filters.firstName) {
+            filtered = filtered.filter(employee => 
+                employee.firstName.toLowerCase().includes(this.filters.firstName.toLowerCase())
+            );
+        }
+
+        if (this.filters.department) {
+            filtered = filtered.filter(employee => employee.department === this.filters.department);
+        }
+
+        if (this.filters.role) {
+            filtered = filtered.filter(employee => employee.role === this.filters.role);
+        }
+
+        // Apply sorting
+        filtered.sort((a, b) => {
+            const aValue = a[this.sortBy].toLowerCase();
+            const bValue = b[this.sortBy].toLowerCase();
+            return aValue.localeCompare(bValue);
+        });
+
+        this.filteredEmployees = filtered;
+        this.currentPage = 1;
+        this.renderEmployees();
+        this.updatePagination();
+    }
+
+    renderEmployees() {
+        const grid = document.getElementById('employee-grid');
+        const noResults = document.getElementById('no-results');
+
+        if (this.filteredEmployees.length === 0) {
+            grid.style.display = 'none';
+            noResults.style.display = 'block';
+            return;
+        }
+
+        grid.style.display = 'grid';
+        noResults.style.display = 'none';
+
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const paginatedEmployees = this.filteredEmployees.slice(startIndex, endIndex);
+
+        grid.innerHTML = paginatedEmployees.map(employee => `
+            <div class="employee-card" data-employee-id="${employee.id}">
+                <h3>${employee.firstName} ${employee.lastName}</h3>
+                <div class="employee-details">
+                    <p><strong>Email:</strong> ${employee.email}</p>
+                    <p><strong>Department:</strong> ${employee.department}</p>
+                    <p><strong>Role:</strong> ${employee.role}</p>
+                </div>
+                <div class="employee-actions">
+                    <button class="edit-btn" onclick="employeeDirectory.editEmployee(${employee.id})">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Edit
+                    </button>
+                    <button class="delete-btn" onclick="employeeDirectory.deleteEmployee(${employee.id})">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"></path>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    updatePagination() {
+        const pagination = document.getElementById('pagination');
+        const paginationInfo = document.getElementById('pagination-info');
+        const paginationControls = document.getElementById('pagination-controls');
+
+        if (this.filteredEmployees.length === 0) {
+            pagination.style.display = 'none';
+            return;
+        }
+
+        const totalPages = Math.ceil(this.filteredEmployees.length / this.itemsPerPage);
+        
+        if (totalPages <= 1) {
+            pagination.style.display = 'none';
+            return;
+        }
+
+        pagination.style.display = 'flex';
+
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
+        const endIndex = Math.min(this.currentPage * this.itemsPerPage, this.filteredEmployees.length);
+
+        paginationInfo.textContent = `Showing ${startIndex}-${endIndex} of ${this.filteredEmployees.length} employees`;
+
+        // Generate pagination controls
+        let controlsHTML = `
+            <button ${this.currentPage === 1 ? 'disabled' : ''} onclick="employeeDirectory.goToPage(${this.currentPage - 1})">
+                Previous
+            </button>
+        `;
+
+        // Show page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= this.currentPage - 2 && i <= this.currentPage + 2)) {
+                controlsHTML += `
+                    <button class="${i === this.currentPage ? 'active' : ''}" onclick="employeeDirectory.goToPage(${i})">
+                        ${i}
+                    </button>
+                `;
+            } else if (i === this.currentPage - 3 || i === this.currentPage + 3) {
+                controlsHTML += '<span>...</span>';
+            }
+        }
+
+        controlsHTML += `
+            <button ${this.currentPage === totalPages ? 'disabled' : ''} onclick="employeeDirectory.goToPage(${this.currentPage + 1})">
+                Next
+            </button>
+        `;
+
+        paginationControls.innerHTML = controlsHTML;
+    }
+
+    goToPage(page) {
+        this.currentPage = page;
+        this.renderEmployees();
+        this.updatePagination();
+    }
+
+    showAddModal() {
+        this.editingEmployee = null;
+        document.getElementById('modal-title').textContent = 'Add Employee';
+        document.getElementById('submit-btn').textContent = 'Add';
+        this.clearForm();
+        document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    editEmployee(id) {
+        this.editingEmployee = this.employees.find(emp => emp.id === id);
+        if (this.editingEmployee) {
+            document.getElementById('modal-title').textContent = 'Edit Employee';
+            document.getElementById('submit-btn').textContent = 'Update';
+            this.populateForm(this.editingEmployee);
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+    }
+
+    deleteEmployee(id) {
+        if (confirm('Are you sure you want to delete this employee?')) {
+            this.employees = this.employees.filter(emp => emp.id !== id);
+            this.applyFiltersAndSearch();
+        }
+    }
+
+    closeModal() {
+        document.getElementById('modal-overlay').style.display = 'none';
+        this.clearForm();
+        this.editingEmployee = null;
+    }
+
+    populateForm(employee) {
+        document.getElementById('firstName').value = employee.firstName;
+        document.getElementById('lastName').value = employee.lastName;
+        document.getElementById('email').value = employee.email;
+        document.getElementById('department').value = employee.department;
+        document.getElementById('role').value = employee.role;
+    }
+
+    clearForm() {
+        document.getElementById('employee-form').reset();
+        this.clearErrors();
+    }
+
+    clearErrors() {
+        const errorElements = document.querySelectorAll('.error-text');
+        errorElements.forEach(element => element.textContent = '');
+        
+        const inputElements = document.querySelectorAll('.form-group input, .form-group select');
+        inputElements.forEach(element => element.classList.remove('error'));
+    }
+
+    validateForm() {
+        this.clearErrors();
+        let isValid = true;
+
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const department = document.getElementById('department').value;
+        const role = document.getElementById('role').value;
+
+        if (!firstName) {
+            this.showError('firstName', 'First name is required');
+            isValid = false;
+        }
+
+        if (!lastName) {
+            this.showError('lastName', 'Last name is required');
+            isValid = false;
+        }
+
+        if (!email) {
+            this.showError('email', 'Email is required');
+            isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            this.showError('email', 'Please enter a valid email address');
+            isValid = false;
+        }
+
+        if (!department) {
+            this.showError('department', 'Department is required');
+            isValid = false;
+        }
+
+        if (!role) {
+            this.showError('role', 'Role is required');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    showError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        const errorElement = document.getElementById(`${fieldId}-error`);
+        
+        field.classList.add('error');
+        errorElement.textContent = message;
+    }
+
+    handleFormSubmit(e) {
+        e.preventDefault();
+
+        if (!this.validateForm()) {
+            return;
+        }
+
+        const formData = {
+            firstName: document.getElementById('firstName').value.trim(),
+            lastName: document.getElementById('lastName').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            department: document.getElementById('department').value,
+            role: document.getElementById('role').value
+        };
+
+        if (this.editingEmployee) {
+            // Update existing employee
+            const index = this.employees.findIndex(emp => emp.id === this.editingEmployee.id);
+            if (index !== -1) {
+                this.employees[index] = { ...this.employees[index], ...formData };
+            }
+        } else {
+            // Add new employee
+            const newEmployee = {
+                id: Date.now(), // Simple ID generation
+                ...formData
+            };
+            this.employees.push(newEmployee);
+        }
+
+        this.closeModal();
+        this.applyFiltersAndSearch();
+    }
+
+    showFilterSidebar() {
+        document.getElementById('sidebar-overlay').style.display = 'block';
+    }
+
+    closeFilterSidebar() {
+        document.getElementById('sidebar-overlay').style.display = 'none';
+    }
+
+    applyFilters() {
+        this.filters.firstName = document.getElementById('filter-firstName').value;
+        this.filters.department = document.getElementById('filter-department').value;
+        this.filters.role = document.getElementById('filter-role').value;
+        
+        this.closeFilterSidebar();
+        this.applyFiltersAndSearch();
+    }
+
+    resetFilters() {
+        this.filters = {
+            firstName: '',
+            department: '',
+            role: ''
+        };
+
+        document.getElementById('filter-firstName').value = '';
+        document.getElementById('filter-department').value = '';
+        document.getElementById('filter-role').value = '';
+
+        this.applyFiltersAndSearch();
+    }
+}
+
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.employeeDirectory = new EmployeeDirectory();
+});
